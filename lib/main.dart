@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String currencySelected = 'USD';
   String selected_date = '2022-01-01';
+  List<String> currencyList = ['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'BGN'];
 
   @override
   void initState() {
@@ -174,8 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //rate = await getRate(currencySelected, selected_date);
                 setState(() {});
               },
-              items: <String>['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'BGN']
-                  .map<DropdownMenuItem<String>>((String value) {
+              items: currencyList.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
