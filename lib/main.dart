@@ -68,7 +68,7 @@ var rate = '---';
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  String dropdownValue = 'USD';
+  String currencySelected = 'USD';
   String selected_date = '2022-01-01';
 
   @override
@@ -77,10 +77,10 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     selected_date = DateFormat('yyyy-MM-dd').format(DateTime.now());
     print(selected_date);
-    getRate(dropdownValue, selected_date);
+    getRate(currencySelected, selected_date);
   }
 
-  void getRate(String currency, String date) async {
+  Future<String> getRate(String currency, String date) async {
     String requestString = 'http://api.nbp.pl/api/exchangerates/rates/A/$currency/$date/?format=json';
     String response;
     var responseJson;
@@ -99,13 +99,19 @@ class _MyHomePageState extends State<MyHomePage> {
       print(responseJson);
     }
 
-    setState(() {
-      rate = responseJson;
-    });
+    // setState(() {
+    //   rate = responseJson;
+    // });
+
+    return responseJson;
   }
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) async {
     selected_date = DateFormat('yyyy-MM-dd').format(args.value);
-    getRate(dropdownValue, selected_date);
+    //rate = await getRate(currencySelected, selected_date);
+
+    setState(() {
+
+        });
 
   }
 
@@ -130,6 +136,8 @@ class _MyHomePageState extends State<MyHomePage> {
           onSelectionChanged: _onSelectionChanged,
           selectionMode: DateRangePickerSelectionMode.single,
           initialSelectedDate: DateTime.now(),
+          monthViewSettings: DateRangePickerMonthViewSettings(firstDayOfWeek: 1),
+          showTodayButton: false,
           // initialSelectedRange: PickerDateRange(
           //     DateTime.now().subtract(const Duration(days: 4)),
           //     DateTime.now().add(const Duration(days: 3))),
@@ -137,10 +145,23 @@ class _MyHomePageState extends State<MyHomePage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(rate),
+            Text(selected_date),
+            FutureBuilder(
+                future: getRate(currencySelected, selected_date),
+                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  rate = snapshot.data!;
+                  return
+                    Text(rate);
+                } else {
+                  return CircularProgressIndicator();
+                }
+
+            }),
+
 
           DropdownButton<String>(
-              value: dropdownValue,
+              value: currencySelected,
               icon: const Icon(Icons.arrow_downward),
               elevation: 16,
               style: const TextStyle(color: Colors.blue),
@@ -148,11 +169,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 2,
                 color: Colors.blueAccent,
               ),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropdownValue = newValue!;
-                  getRate(dropdownValue, selected_date);
-                });
+              onChanged: (String? newValue) async {
+                currencySelected = newValue!;
+                //rate = await getRate(currencySelected, selected_date);
+                setState(() {});
               },
               items: <String>['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'BGN']
                   .map<DropdownMenuItem<String>>((String value) {
